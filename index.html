@@ -75,10 +75,7 @@
     const inputEl = document.getElementById("msgInput");
     const btnEl = document.getElementById("sendBtn");
     
-    const GITHUB_TOKEN = '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';    //settings, developer settings, personal access tokens, tokens classic, with repo perms
-    const REPO_OWNER = 'le8pold';
-    const REPO_NAME = 'arduino';
-    const FILE_PATH = 'msg.txt';
+    const WORKER_URL = 'https://YOUR_WORKER_NAME.YOUR_SUBDOMAIN.workers.dev'; 
 
     let isProcessing = false;
 
@@ -105,28 +102,10 @@
         }, 100);
 
         try {
-            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
-            const getFile = await fetch(url, {
-                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-            });
-            
-            let sha = "";
-            if (getFile.ok) {
-                const data = await getFile.json();
-                sha = data.sha;
-            }
-
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: "Update msg.txt via site",
-                    content: btoa(message),
-                    sha: sha 
-                })
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
             });
 
             clearInterval(spinnerInterval);
