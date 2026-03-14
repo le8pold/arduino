@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>msg.hylton.onl</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    #gate {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    input {
+        width: 237px;
+        height: 40px;
+        line-height: 40px;
+        padding: 0 5px;
+        border: 2px solid black;
+        font-size: 18px;
+        text-align: center;
+        outline: none;
+        background: white;
+        display: block;
+        font-family: Arial, sans-serif;
+    }
+    button {
+        width: 250px;
+        height: 44px;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid black;
+        background: white;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        text-transform: uppercase;
+        transition: 0.2s;
+    }
+    button:hover:not(:disabled) {
+        background: black;
+        color: white;
+    }
+    button:disabled {
+        cursor: default;
+        background: white;
+        color: black;
+    }
+    button.error-state {
+        color: rgb(255, 0, 0);
+        border-color: black;
+    }
+    button.success-state {
+        color: rgb(0, 150, 0);
+        border-color: black;
+    }
+</style>
+</head>
+<body>
+<div id="gate">
+    <input type="text" id="msgInput" placeholder=" " maxlength="14" onfocus="resetUI()">
+    <button id="sendBtn" onclick="sendMessage()">SEND MESSAGE</button>
+    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">made by leo. max chars: 14.</p>
+    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">v1.0.0</p>
+</div>
+<script>
+    const inputEl = document.getElementById("msgInput");
+    const btnEl = document.getElementById("sendBtn");
+    
+    const GITHUB_TOKEN = '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';    //settings, developer settings, personal access tokens, tokens classic, with repo perms
+    const REPO_OWNER = 'le8pold';
+    const REPO_NAME = 'arduino';
+    const FILE_PATH = 'msg.txt';
+
+    let isProcessing = false;
+
+    function resetUI() {
+        inputEl.value = "";
+        btnEl.textContent = "SEND MESSAGE";
+        btnEl.disabled = false;
+        btnEl.classList.remove("error-state", "success-state");
+        isProcessing = false;
+    }
+
+    async function sendMessage() {
+        const message = inputEl.value.trim();
+        if (!message || isProcessing) return;
+        
+        isProcessing = true;
+        btnEl.disabled = true;
+
+        const frames = ['|', '/', '-', '\\'];
+        let i = 0;
+        const spinnerInterval = setInterval(() => {
+            i = (i + 1) % frames.length;
+            btnEl.textContent = frames[i];
+        }, 100);
+
+        try {
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+            const getFile = await fetch(url, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            
+            let sha = "";
+            if (getFile.ok) {
+                const data = await getFile.json();
+                sha = data.sha;
+            }
+
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: "Update msg.txt via site",
+                    content: btoa(message),
+                    sha: sha 
+                })
+            });
+
+            clearInterval(spinnerInterval);
+
+            if (response.ok) {
+                btnEl.textContent = "MESSAGE SENT";
+                btnEl.classList.add("success-state");
+            } else {
+                throw new Error();
+            }
+
+        } catch (error) {
+            clearInterval(spinnerInterval);
+            btnEl.classList.add("error-state");
+            btnEl.textContent = "SEND FAILED";
+        }
+    }
+
+    inputEl.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") sendMessage();
+    });
+</script>
+</body>
+</html>
