@@ -20,8 +20,13 @@
         align-items: center;
         gap: 20px;
     }
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 251px; 
+    }
     input {
-        width: 237px;
         height: 40px;
         line-height: 40px;
         padding: 0 5px;
@@ -30,8 +35,18 @@
         text-align: center;
         outline: none;
         background: white;
-        display: block;
         font-family: Arial, sans-serif;
+    }
+    #initInput {
+        width: 40px;
+        text-transform: uppercase;
+    }
+    #msgInput {
+        width: 165px;
+    }
+    .separator {
+        font-weight: bold;
+        font-size: 18px;
     }
     button {
         width: 250px;
@@ -66,13 +81,19 @@
 </head>
 <body>
 <div id="gate">
-    <input type="text" id="msgInput" placeholder=" " maxlength="14" onfocus="resetUI()">
+    <div class="input-group">
+        <input type="text" id="initInput" placeholder="" maxlength="2" onfocus="resetUI()">
+        <span class="separator">:</span>
+        <input type="text" id="msgInput" placeholder="" maxlength="13" onfocus="resetUI()">
+    </div>
     <button id="sendBtn" onclick="sendMessage()">SEND MESSAGE</button>
-    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">made by leo. max chars: 14. no accents plz.</p>
-    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">v1.1.3</p>
+    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">put ur initials (2 chars) on the left, message (13 chars max) on the right.</p>
+    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">made by leo.</p>
+    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">v1.2.0</p>
 </div>
 <script>
-    const inputEl = document.getElementById("msgInput");
+    const initEl = document.getElementById("initInput");
+    const msgEl = document.getElementById("msgInput");
     const btnEl = document.getElementById("sendBtn");
     
     const WORKER_URL = 'https://rough-mouse-d68b.hylton-leopold.workers.dev'; 
@@ -80,7 +101,6 @@
     let isProcessing = false;
 
     function resetUI() {
-        inputEl.value = "";
         btnEl.textContent = "SEND MESSAGE";
         btnEl.disabled = false;
         btnEl.classList.remove("error-state", "success-state");
@@ -88,8 +108,12 @@
     }
 
     async function sendMessage() {
-        const message = inputEl.value.trim();
-        if (!message || isProcessing) return;
+        const initials = initEl.value.trim().toUpperCase() || "??";
+        const msgText = msgEl.value.trim();
+        
+        if (!msgText || isProcessing) return;
+        
+        const message = `${initials}:${msgText}`; 
         
         isProcessing = true;
         btnEl.disabled = true;
@@ -113,6 +137,8 @@
             if (response.ok) {
                 btnEl.textContent = "MESSAGE SENT";
                 btnEl.classList.add("success-state");
+                initEl.value = "";
+                msgEl.value = "";
             } else {
                 throw new Error();
             }
@@ -124,9 +150,8 @@
         }
     }
 
-    inputEl.addEventListener("keypress", function(e) {
-        if (e.key === "Enter") sendMessage();
-    });
+    initEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(); });
+    msgEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(); });
 </script>
 </body>
 </html>
