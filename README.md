@@ -7,3 +7,4 @@ the python scirpt sends the message to the arduino's lcd display.
 theres also hardware monitoring on the arduino. fun little project,
 I found and old arduino kit and thought itd be fun to make 
 somrthing like this.
+volundtyr is my little worker lol. will probably try to make this readme a bit better looking and understanding later but i mean whos reading ts anyways
