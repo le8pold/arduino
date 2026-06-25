@@ -123,9 +123,8 @@
         const initials = initEl.value.trim().toUpperCase() || "??";
         let msgText = msgEl.value.trim();
         
-        if (shouldBuzz) {
-            const randomId = Math.floor(Math.random() * 90 + 10);
-            msgText = `BZ:${randomId}`;
+        if (shouldBuzz && !msgText) {
+            msgText = "BUZZ";
         }
         
         if (!msgText || isProcessing) return;
@@ -154,6 +153,10 @@
 
             clearInterval(spinnerInterval);
 
+            isProcessing = false;
+            sendBtn.disabled = false;
+            buzzBtn.disabled = false;
+
             if (response.ok) {
                 activeBtn.textContent = shouldBuzz ? "BUZZ SENT" : "MESSAGE SENT";
                 activeBtn.classList.add("success-state");
@@ -165,6 +168,11 @@
 
         } catch (error) {
             clearInterval(spinnerInterval);
+            
+            isProcessing = false;
+            sendBtn.disabled = false;
+            buzzBtn.disabled = false;
+            
             activeBtn.classList.add("error-state");
             activeBtn.textContent = "SEND FAILED";
         }
