@@ -64,6 +64,14 @@
         background: black;
         color: white;
     }
+    button.buzz-btn {
+        color: rgb(255, 0, 0);
+        border-color: rgb(255, 0, 0);
+    }
+    button.buzz-btn:hover:not(:disabled) {
+        background: rgb(255, 0, 0);
+        color: white;
+    }
     button:disabled {
         cursor: default;
         background: white;
@@ -86,71 +94,83 @@
         <span class="separator">:</span>
         <input type="text" id="msgInput" placeholder="" maxlength="13" onfocus="resetUI()">
     </div>
-    <button id="sendBtn" onclick="sendMessage()">SEND MESSAGE</button>
+    <button id="sendBtn" onclick="sendMessage(false)">SEND MESSAGE</button>
+    <button id="buzzBtn" class="buzz-btn" onclick="sendMessage(true)">BUZZ ME</button>
     <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">put your initials on the left, message on the right.</p>
-    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">made by leo. v1.2.4</p>
+    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">made by leo. v2.0.0</p>
 </div>
 <script>
-    const initEl = document.getElementById("initInput");
-    const msgEl = document.getElementById("msgInput");
-    const btnEl = document.getElementById("sendBtn");
+    const initEl = document.getElementById("initInput");[cite: 3]
+    const msgEl = document.getElementById("msgInput");[cite: 3]
+    const sendBtn = document.getElementById("sendBtn");
+    const buzzBtn = document.getElementById("buzzBtn");
     
-    const WORKER_URL = 'https://rough-mouse-d68b.hylton-leopold.workers.dev'; 
+    const WORKER_URL = 'https://rough-mouse-d68b.hylton-leopold.workers.dev';[cite: 3]
 
-    let isProcessing = false;
+    let isProcessing = false;[cite: 3]
 
     function resetUI() {
-        btnEl.textContent = "SEND MESSAGE";
-        btnEl.disabled = false;
-        btnEl.classList.remove("error-state", "success-state");
-        isProcessing = false;
+        sendBtn.textContent = "SEND MESSAGE";
+        buzzBtn.textContent = "BUZZ ME";
+        sendBtn.disabled = false;
+        buzzBtn.disabled = false;
+        sendBtn.classList.remove("error-state", "success-state");
+        buzzBtn.classList.remove("error-state", "success-state");
+        isProcessing = false;[cite: 3]
     }
 
-    async function sendMessage() {
-        const initials = initEl.value.trim().toUpperCase() || "??";
-        const msgText = msgEl.value.trim();
-        
-        if (!msgText || isProcessing) return;
-        
-        const message = `${initials}:${msgText}`; 
-        
-        isProcessing = true;
-        btnEl.disabled = true;
+    async function sendMessage(shouldBuzz) {
+        const initials = initEl.value.trim().toUpperCase() || "??";[cite: 3]
+        let msgText = msgEl.value.trim();
 
-        const frames = ['|', '/', '-', '\\'];
-        let i = 0;
+        if (shouldBuzz && !msgText) {
+            msgText = "BUZZ";
+        }
+        
+        if (!msgText || isProcessing) return;[cite: 3]
+        
+        const message = `${initials}:${msgText}`;[cite: 3]
+        
+        isProcessing = true;[cite: 3]
+        sendBtn.disabled = true;
+        buzzBtn.disabled = true;
+
+        const activeBtn = shouldBuzz ? buzzBtn : sendBtn;
+
+        const frames = ['|', '/', '-', '\\'];[cite: 3]
+        let i = 0;[cite: 3]
         const spinnerInterval = setInterval(() => {
-            i = (i + 1) % frames.length;
-            btnEl.textContent = frames[i];
-        }, 100);
+            i = (i + 1) % frames.length;[cite: 3]
+            activeBtn.textContent = frames[i];
+        }, 100);[cite: 3]
 
         try {
-            const response = await fetch(WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
+            const response = await fetch(WORKER_URL, {[cite: 3]
+                method: 'POST',[cite: 3]
+                headers: { 'Content-Type': 'application/json' },[cite: 3]
+                body: JSON.stringify({ message, buzz: shouldBuzz })
             });
 
-            clearInterval(spinnerInterval);
+            clearInterval(spinnerInterval);[cite: 3]
 
-            if (response.ok) {
-                btnEl.textContent = "MESSAGE SENT";
-                btnEl.classList.add("success-state");
-                initEl.value = "";
-                msgEl.value = "";
+            if (response.ok) {[cite: 3]
+                activeBtn.textContent = shouldBuzz ? "BUZZ SENT" : "MESSAGE SENT";
+                activeBtn.classList.add("success-state");
+                initEl.value = "";[cite: 3]
+                msgEl.value = "";[cite: 3]
             } else {
-                throw new Error();
+                throw new Error();[cite: 3]
             }
 
         } catch (error) {
-            clearInterval(spinnerInterval);
-            btnEl.classList.add("error-state");
-            btnEl.textContent = "SEND FAILED";
+            clearInterval(spinnerInterval);[cite: 3]
+            activeBtn.classList.add("error-state");
+            activeBtn.textContent = "SEND FAILED";
         }
     }
 
-    initEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(); });
-    msgEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(); });
+    initEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(false); });[cite: 3]
+    msgEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(false); });[cite: 3]
 </script>
 </body>
 </html>
