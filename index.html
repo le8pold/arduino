@@ -97,17 +97,17 @@
     <button id="sendBtn" onclick="sendMessage(false)">SEND MESSAGE</button>
     <button id="buzzBtn" class="buzz-btn" onclick="sendMessage(true)">BUZZ ME</button>
     <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">put your initials on the left, message on the right.</p>
-    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">made by leo. v2.0.0</p>
+    <p style="margin-top: 10px; font-size: 14px; color: black; font-family: Arial, sans-serif;">made by leo. v2.0.1</p>
 </div>
 <script>
-    const initEl = document.getElementById("initInput");[cite: 3]
-    const msgEl = document.getElementById("msgInput");[cite: 3]
+    const initEl = document.getElementById("initInput");
+    const msgEl = document.getElementById("msgInput");
     const sendBtn = document.getElementById("sendBtn");
     const buzzBtn = document.getElementById("buzzBtn");
     
-    const WORKER_URL = 'https://rough-mouse-d68b.hylton-leopold.workers.dev';[cite: 3]
+    const WORKER_URL = 'https://rough-mouse-d68b.hylton-leopold.workers.dev'; 
 
-    let isProcessing = false;[cite: 3]
+    let isProcessing = false;
 
     function resetUI() {
         sendBtn.textContent = "SEND MESSAGE";
@@ -116,61 +116,61 @@
         buzzBtn.disabled = false;
         sendBtn.classList.remove("error-state", "success-state");
         buzzBtn.classList.remove("error-state", "success-state");
-        isProcessing = false;[cite: 3]
+        isProcessing = false;
     }
 
     async function sendMessage(shouldBuzz) {
-        const initials = initEl.value.trim().toUpperCase() || "??";[cite: 3]
+        const initials = initEl.value.trim().toUpperCase() || "??";
         let msgText = msgEl.value.trim();
-
+        
         if (shouldBuzz && !msgText) {
             msgText = "BUZZ";
         }
         
-        if (!msgText || isProcessing) return;[cite: 3]
+        if (!msgText || isProcessing) return;
         
-        const message = `${initials}:${msgText}`;[cite: 3]
+        const message = `${initials}:${msgText}`; 
         
-        isProcessing = true;[cite: 3]
+        isProcessing = true;
         sendBtn.disabled = true;
         buzzBtn.disabled = true;
 
         const activeBtn = shouldBuzz ? buzzBtn : sendBtn;
 
-        const frames = ['|', '/', '-', '\\'];[cite: 3]
-        let i = 0;[cite: 3]
+        const frames = ['|', '/', '-', '\'];
+        let i = 0;
         const spinnerInterval = setInterval(() => {
-            i = (i + 1) % frames.length;[cite: 3]
+            i = (i + 1) % frames.length;
             activeBtn.textContent = frames[i];
-        }, 100);[cite: 3]
+        }, 100);
 
         try {
-            const response = await fetch(WORKER_URL, {[cite: 3]
-                method: 'POST',[cite: 3]
-                headers: { 'Content-Type': 'application/json' },[cite: 3]
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message, buzz: shouldBuzz })
             });
 
-            clearInterval(spinnerInterval);[cite: 3]
+            clearInterval(spinnerInterval);
 
-            if (response.ok) {[cite: 3]
+            if (response.ok) {
                 activeBtn.textContent = shouldBuzz ? "BUZZ SENT" : "MESSAGE SENT";
                 activeBtn.classList.add("success-state");
-                initEl.value = "";[cite: 3]
-                msgEl.value = "";[cite: 3]
+                initEl.value = "";
+                msgEl.value = "";
             } else {
-                throw new Error();[cite: 3]
+                throw new Error();
             }
 
         } catch (error) {
-            clearInterval(spinnerInterval);[cite: 3]
+            clearInterval(spinnerInterval);
             activeBtn.classList.add("error-state");
             activeBtn.textContent = "SEND FAILED";
         }
     }
 
-    initEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(false); });[cite: 3]
-    msgEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(false); });[cite: 3]
+    initEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(false); });
+    msgEl.addEventListener("keypress", function(e) { if (e.key === "Enter") sendMessage(false); });
 </script>
 </body>
 </html>
